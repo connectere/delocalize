@@ -27,7 +27,7 @@ ActionView::Helpers::Tags::TextField.class_eval do
           @options[:value] = number_with_precision(value, opts) unless hidden_for_integer
         end
       elsif column.date? || column.time?
-        @options[:value] = value ? I18n.l(value, :format => @options.delete(:format)) : nil
+        @options[:value] = value.present? ? I18n.l(value, :format => @options.delete(:format)) : nil
       end
     end
 

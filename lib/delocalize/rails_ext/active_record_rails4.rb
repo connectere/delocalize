@@ -11,12 +11,59 @@ ActiveRecord::ConnectionAdapters::Column.class_eval do
   end
 end
 
+=begin
 module ActiveRecord::AttributeMethods::Write
   def type_cast_attribute_for_write(column, value)
     return value unless column
 
     value = Numeric.parse_localized(value) if column.number? && I18n.delocalization_enabled?
     column.type_cast_for_write value
+  end
+end
+=end
+
+module ActiveRecord
+  class Attribute
+    def value_before_type_cast
+      type.number? ? ::Numeric.parse_localized(@value_before_type_cast) : @value_before_type_cast
+    end
+  end
+end
+
+module ActiveRecord
+ 
+  module Type
+ 
+    class Time
+      def type_cast_from_user(value)
+        value = ::Time.parse_localized(value) rescue value
+        type_cast(value)
+      end
+    end
+ 
+    class DateTime
+      def type_cast_from_user(value)
+        value = ::DateTime.parse_localized(value) rescue value
+        type_cast(value)
+      end
+    end
+ 
+    class Date
+      def type_cast_from_user(value)
+        value = ::Date.parse_localized(value) rescue value
+        type_cast(value)
+      end
+    end
+ 
+    module Numeric
+ 
+      def non_numeric_string?(value)
+        # TODO: Cache!
+        value.to_s !~ /\A\d+#{Regexp.escape(I18n.t(:'number.format.separator'))}?\d*\z/
+      end
+ 
+    end
+ 
   end
 end
 
@@ -34,6 +81,7 @@ ActiveRecord::Base.class_eval do
   end
   alias_method_chain :write_attribute, :localization
 
+=begin
   define_method :_field_changed? do |attr, old, value|
     if column = column_for_attribute(attr)
       if column.number? && column.null && (old.nil? || old == 0) && value.blank?
@@ -50,6 +98,7 @@ ActiveRecord::Base.class_eval do
     end
     old != value
   end
+=end
 
   def define_method_attribute=(attr_name)
     if create_time_zone_conversion_attribute?(attr_name, columns_hash[attr_name])

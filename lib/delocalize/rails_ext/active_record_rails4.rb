@@ -11,17 +11,6 @@ ActiveRecord::ConnectionAdapters::Column.class_eval do
   end
 end
 
-=begin
-module ActiveRecord::AttributeMethods::Write
-  def type_cast_attribute_for_write(column, value)
-    return value unless column
-
-    value = Numeric.parse_localized(value) if column.number? && I18n.delocalization_enabled?
-    column.type_cast_for_write value
-  end
-end
-=end
-
 module ActiveRecord
   class Attribute
     def value_before_type_cast
@@ -80,25 +69,6 @@ ActiveRecord::Base.class_eval do
     write_attribute_without_localization(attr_name, new_value)
   end
   alias_method_chain :write_attribute, :localization
-
-=begin
-  define_method :_field_changed? do |attr, old, value|
-    if column = column_for_attribute(attr)
-      if column.number? && column.null && (old.nil? || old == 0) && value.blank?
-        # For nullable numeric columns, NULL gets stored in database for blank (i.e. '') values.
-        # Hence we don't record it as a change if the value changes from nil to ''.
-        # If an old value of 0 is set to '' we want this to get changed to nil as otherwise it'll
-        # be typecast back to 0 (''.to_i => 0)
-        value = nil
-      elsif column.number?
-        value = column.type_cast(Numeric.parse_localized(value))
-      else
-        value = column.type_cast(value)
-      end
-    end
-    old != value
-  end
-=end
 
   def define_method_attribute=(attr_name)
     if create_time_zone_conversion_attribute?(attr_name, columns_hash[attr_name])

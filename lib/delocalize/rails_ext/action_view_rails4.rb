@@ -26,8 +26,6 @@ ActionView::Helpers::Tags::TextField.class_eval do
           # we don't format integer hidden fields because this breaks nested_attributes
           @options[:value] = number_with_precision(value, opts) unless hidden_for_integer
         end
-      elsif column.date? || column.time?
-        @options[:value] = value.present? ? I18n.l(value, :format => @options.delete(:format)) : nil
       end
     end
 

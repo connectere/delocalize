@@ -48,7 +48,8 @@ module ActiveRecord
  
       def non_numeric_string?(value)
         # TODO: Cache!
-        value.to_s !~ /\A\d+#{Regexp.escape(I18n.t(:'number.format.separator'))}?\d*\z/
+        #value.to_s !~ /\A\d+#{Regexp.escape(I18n.t(:'number.format.separator'))}?\d*\z/
+        false
       end
  
     end
